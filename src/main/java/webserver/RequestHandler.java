@@ -38,7 +38,13 @@ public class RequestHandler implements Runnable {
             String method = firstLines[0];
             String url = firstLines[1];
 
-            byte[] body = FileIoUtils.loadFileFromClasspath("./templates" + url);
+            byte[] body = "hello, world!".getBytes();
+
+            if (url.contains(".html")) {
+                body = FileIoUtils.loadFileFromClasspath("./templates" + url);
+            } else if (url.contains(".css")) {
+                body = FileIoUtils.loadFileFromClasspath("./static" + url);
+            }
 
             DataOutputStream dos = new DataOutputStream(out);
             response200Header(dos, body.length);

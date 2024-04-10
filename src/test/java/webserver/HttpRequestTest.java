@@ -25,4 +25,13 @@ public class HttpRequestTest {
         assertThat(restTemplate.getForEntity("http://localhost:8080/index.html", String.class).getBody())
             .isEqualTo(expected);
     }
+
+    @Test
+    void get_css_test() throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+        final String expected = new String(FileIoUtils.loadFileFromClasspath("./static/css/styles.css"));
+
+        assertThat(restTemplate.getForEntity("http://localhost:8080/css/styles.css", String.class).getBody())
+            .isEqualTo(expected);
+    }
 }
