@@ -1,5 +1,7 @@
 package utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,5 +30,18 @@ public class RequestParserUtils {
             }
         );
         return queryStrings;
+    }
+
+    public static Map<String, String> checkHeader(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String headerLine = bufferedReader.readLine();
+
+        while (!"".equals(headerLine) && headerLine != null) {
+            String[] headerSplit = headerLine.split(": ");
+            headers.put(headerSplit[0], headerSplit[1]);
+            headerLine = bufferedReader.readLine();
+        }
+
+        return headers;
     }
 }

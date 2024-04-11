@@ -1,5 +1,9 @@
 package utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -43,7 +47,16 @@ class RequestParserUtilsTest {
         assertThat(stringStringMap.get("userId")).isEqualTo("cu");
     }
 
+    @Test
+    void 여러_줄을_입력받아_header_map_을_구한다() throws IOException {
+        String input = "Host: localhost:8080\n" +
+                        "Accept: text/css,*/*;q=0.1\n" +
+                        "Connection: keep-alive";
+        BufferedReader reader = new BufferedReader(new StringReader(input));
 
+        Map<String, String> stringStringMap = RequestParserUtils.checkHeader(reader);
+        assertThat(stringStringMap.get("Host")).isEqualTo("localhost:8080");
+    }
 
 
 }
