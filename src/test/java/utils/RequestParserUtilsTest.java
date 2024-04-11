@@ -1,6 +1,10 @@
 package utils;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+
+import model.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +34,15 @@ class RequestParserUtilsTest {
 
         assertThat(path).isEqualTo("/user/create");
     }
+
+    @Test
+    void 한_줄을_입력받아_query_string_을_구한다() {
+        String input = "GET /user/create?userId=cu&password=password&name=%EC%9D%B4%EB%8F%99%EA%B7%9C&email=brainbackdoor%40gmail.com HTTP/1.1";
+        Map<String, String> stringStringMap = RequestParserUtils.checkQueryStringFromLine(input);
+
+        assertThat(stringStringMap.get("userId")).isEqualTo("cu");
+    }
+
 
 
 

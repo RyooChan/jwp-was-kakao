@@ -12,7 +12,7 @@
 
 - [x] method parser 는 첫 번째 라인을 통해 BufferedReader 를 돌려 method 를 구한다.
 - [x] path parser 는 첫 번째 라인을 통해 BufferedReader 를 돌려 path 를 구한다.
-- [ ] querystring parser 는 첫 번째 라인을 통해 BufferedReader 를 돌려 query string 정보를 Map 으로 구한다.
+- [x] querystring parser 는 첫 번째 라인을 통해 BufferedReader 를 돌려 query string 정보를 Map 으로 구한다.
 - [ ] Header parser 는 두 번째부터 쭉 BufferedReader 를 돌려 Map 으로 구한다.
 - [ ] body parser 는 body 를 받아 Map 으로 구한다.
 - [ ] GET `/index.html` 요청이 들어오면 해당 페이지를 돌려준다.
