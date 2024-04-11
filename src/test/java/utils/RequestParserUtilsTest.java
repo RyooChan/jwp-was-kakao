@@ -1,5 +1,8 @@
 package utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +53,16 @@ class RequestParserUtilsTest {
 
         HttpRequestHeader httpRequestHeader = RequestParserUtils.checkHeader(input);
         assertThat(httpRequestHeader.getHeaders().get("Host")).isEqualTo("localhost:8080");
+    }
+
+    @Test
+    void 버퍼드리더를_통해_body_를_구한다() throws IOException {
+        String input = "userId=cu&password=password&name=%EC%9D%B4%EB%8F%99%EA%B7%9C&email=brainbackdoor%40gmail.com";
+        int length = input.length();
+        BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+
+        HttpRequestBody httpRequestBody = RequestParserUtils.checkBody(IOUtils.readData(bufferedReader, length));
+        assertThat(httpRequestBody.getBody()).isEqualTo(input);
     }
 
 

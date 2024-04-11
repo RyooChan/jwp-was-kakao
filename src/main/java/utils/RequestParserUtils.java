@@ -18,4 +18,8 @@ public class RequestParserUtils {
     public static HttpRequestHeader checkHeader(List<String> headers) {
         return HttpRequestHeader.findHttpRequestQueryString(headers);
     }
+
+    public static HttpRequestBody checkBody(String body) {
+        return HttpRequestBody.findHttpRequestBody(body);
+    }
 }
