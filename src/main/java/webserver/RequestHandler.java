@@ -30,21 +30,30 @@ public class RequestHandler implements Runnable {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
-            String firstLine = bufferedReader.readLine();
-            HttpRequest httpRequest = HttpRequest.of(firstLine);
+
+            HttpRequest httpRequest = HttpRequest.ofFirstLine(bufferedReader);
 
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
 
-            if (httpRequest.getHttpRequestPath().getPath().endsWith(".html")) {
-                body = FileIoUtils.loadFileFromClasspath("./templates" + httpRequest.getHttpRequestPath().getPath());
-            }
+            byte[] body = getBodyFromRequest(httpRequest);
 
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    private static byte[] getBodyFromRequest(HttpRequest httpRequest) throws IOException, URISyntaxException {
+        if (httpRequest.getHttpRequestPath().getPath().endsWith(".html")) {
+            return FileIoUtils.loadFileFromClasspath("./templates" + httpRequest.getHttpRequestPath().getPath());
+        }
+
+        if (httpRequest.getHttpRequestPath().getPath().endsWith(".css")) {
+            return FileIoUtils.loadFileFromClasspath("./static" + httpRequest.getHttpRequestPath().getPath());
+        }
+
+        return "Hello World".getBytes();
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {

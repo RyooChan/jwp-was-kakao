@@ -28,4 +28,13 @@ public class HttpRequestTest {
         ResponseEntity<String> actual = restTemplate.getForEntity("http://localhost:8080/index.html", String.class);
         assertThat(actual.getBody()).isEqualTo(expected);
     }
+
+    @Test
+    void get_css() throws IOException, URISyntaxException {
+        RestTemplate restTemplate = new RestTemplate();
+        String expected = new String(FileIoUtils.loadFileFromClasspath("./static/css/styles.css"));
+
+        ResponseEntity<String> actual = restTemplate.getForEntity("http://localhost:8080/css/styles.css", String.class);
+        assertThat(actual.getBody()).isEqualTo(expected);
+    }
 }
