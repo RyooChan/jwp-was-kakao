@@ -18,7 +18,6 @@ public class HttpRequestQueryString {
     public static HttpRequestQueryString findHttpRequestQueryString(String pathString) {
         String[] PathAndqueryString = pathString.split("\\?");
         String[] querySplit = PathAndqueryString[1].split("&");
-        System.out.println(querySplit[0]);
 
         Map<String, String> httpRequestQueryStrings = Arrays.stream(querySplit)
             .map(parameter -> parameter.split("="))

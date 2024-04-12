@@ -12,6 +12,9 @@ public class RequestParserUtils {
     }
 
     public static HttpRequestQueryString checkQueryStringFromLine(String input) {
+        if (!input.contains("\\?")) {
+            return null;
+        }
         return HttpRequestQueryString.findHttpRequestQueryString(input);
     }
 
