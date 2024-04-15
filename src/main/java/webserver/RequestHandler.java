@@ -8,10 +8,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import model.CreateUserGet;
 import utils.FileIoUtils;
 
 public class RequestHandler implements Runnable {
@@ -35,9 +37,13 @@ public class RequestHandler implements Runnable {
 
             DataOutputStream dos = new DataOutputStream(out);
 
+            if (httpRequest == null) {
+                return;
+            }
+
             byte[] body = getBodyFromRequest(httpRequest);
 
-            response200Header(dos, body.length);
+            response200Header(dos, body.length, httpRequest.getHttpRequestPath().getPath());
             responseBody(dos, body);
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -45,6 +51,7 @@ public class RequestHandler implements Runnable {
     }
 
     private static byte[] getBodyFromRequest(HttpRequest httpRequest) throws IOException, URISyntaxException {
+
         if (httpRequest.getHttpRequestPath().getPath().endsWith(".html")) {
             return FileIoUtils.loadFileFromClasspath("./templates" + httpRequest.getHttpRequestPath().getPath());
         }
@@ -53,10 +60,16 @@ public class RequestHandler implements Runnable {
             return FileIoUtils.loadFileFromClasspath("./static" + httpRequest.getHttpRequestPath().getPath());
         }
 
+        if (Objects.equals(httpRequest.getHttpRequestPath().getPath(), "/user/create")) {
+            CreateUserGet createUserGet = new CreateUserGet();
+            createUserGet.create(httpRequest);
+            return FileIoUtils.loadFileFromClasspath("./templates/index.html");
+        }
+
         return "Hello World".getBytes();
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void responseIndex200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
@@ -66,6 +79,28 @@ public class RequestHandler implements Runnable {
             logger.error(e.getMessage());
         }
     }
+
+
+    private void responseCss200Header(DataOutputStream dos, int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, String path) {
+        if (path.endsWith(".html")) {
+            responseIndex200Header(dos, lengthOfBodyContent);
+            return;
+        }
+
+        responseCss200Header(dos, lengthOfBodyContent);
+    }
+
 
     private void responseBody(DataOutputStream dos, byte[] body) {
         try {
