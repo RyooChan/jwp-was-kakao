@@ -19,6 +19,10 @@ public class HttpRequestHeader {
         return new HttpRequestHeader(headers);
     }
 
+    public int findContentLength() {
+        return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

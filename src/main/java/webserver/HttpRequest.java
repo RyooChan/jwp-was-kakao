@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.HttpRequestBody;
 import utils.HttpRequestHeader;
 import utils.HttpRequestMethod;
 import utils.HttpRequestPath;
 import utils.HttpRequestQueryString;
+import utils.IOUtils;
 import utils.RequestParserUtils;
 
 public class HttpRequest {
@@ -16,12 +18,14 @@ public class HttpRequest {
     private final HttpRequestPath httpRequestPath;
     private final HttpRequestQueryString httpRequestQueryString;
     private final HttpRequestHeader httpRequestHeader;
+    private final HttpRequestBody httpRequestBody;
 
-    private HttpRequest(HttpRequestMethod httpRequestMethod, HttpRequestPath httpRequestPath, HttpRequestQueryString httpRequestQueryString, HttpRequestHeader httpRequestHeader) {
+    private HttpRequest(HttpRequestMethod httpRequestMethod, HttpRequestPath httpRequestPath, HttpRequestQueryString httpRequestQueryString, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
         this.httpRequestMethod = httpRequestMethod;
         this.httpRequestPath = httpRequestPath;
         this.httpRequestQueryString = httpRequestQueryString;
         this.httpRequestHeader = httpRequestHeader;
+        this.httpRequestBody = httpRequestBody;
     }
 
     public HttpRequestMethod getHttpRequestMethod() {
@@ -38,6 +42,10 @@ public class HttpRequest {
 
     public HttpRequestHeader getHttpRequestHeader() {
         return httpRequestHeader;
+    }
+
+    public HttpRequestBody getHttpRequestBody() {
+        return httpRequestBody;
     }
 
     public static HttpRequest ofFirstLine(BufferedReader bufferedReader) throws IOException {
@@ -59,6 +67,10 @@ public class HttpRequest {
         }
         HttpRequestHeader httpRequestHeader = RequestParserUtils.checkHeader(headers);
 
-        return new HttpRequest(httpRequestMethod, httpRequestPath, httpRequestQueryString, httpRequestHeader);
+        HttpRequestBody httpRequestBody = RequestParserUtils.checkBody(
+            IOUtils.readData(bufferedReader, httpRequestHeader.findContentLength())
+        );
+
+        return new HttpRequest(httpRequestMethod, httpRequestPath, httpRequestQueryString, httpRequestHeader, httpRequestBody);
     }
 }

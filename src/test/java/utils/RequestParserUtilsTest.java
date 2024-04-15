@@ -62,7 +62,7 @@ class RequestParserUtilsTest {
         BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
 
         HttpRequestBody httpRequestBody = RequestParserUtils.checkBody(IOUtils.readData(bufferedReader, length));
-        assertThat(httpRequestBody.getBody()).isEqualTo(input);
+        assertThat(httpRequestBody.getBody().get("userId")).isEqualTo("cu");
     }
 
 
