@@ -6,16 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import model.CreateUser;
-import model.CreateUserGet;
-import model.CreateUserPost;
+import model.User;
 import utils.FileIoUtils;
 import utils.HttpRequestMethod;
 
@@ -51,30 +49,29 @@ public class RequestHandler implements Runnable {
 
     private static byte[] getBodyFromRequest(HttpRequest httpRequest) throws IOException, URISyntaxException {
 
-        if (httpRequest.getHttpRequestPath().getPath().endsWith(".html")) {
+        if (httpRequest.getHttpRequestPath().isEndsWith(".html")) {
             return FileIoUtils.loadFileFromClasspath("./templates" + httpRequest.getHttpRequestPath().getPath());
         }
 
-        if (httpRequest.getHttpRequestPath().getPath().endsWith(".css")) {
+        if (httpRequest.getHttpRequestPath().isEndsWith(".css")) {
             return FileIoUtils.loadFileFromClasspath("./static" + httpRequest.getHttpRequestPath().getPath());
         }
 
-        if (Objects.equals(httpRequest.getHttpRequestPath().getPath(), "/user/create")) {
-            CreateUser createUser = createUserByMethod(httpRequest);
-            createUser.create(httpRequest);
+        if (httpRequest.getHttpRequestPath().isPathEquals("/user/create")) {
+            User user = createUserByMethod(httpRequest);
             return FileIoUtils.loadFileFromClasspath("./templates/index.html");
         }
 
         return "Hello World".getBytes();
     }
 
-    private static CreateUser createUserByMethod(HttpRequest httpRequest) {
+    private static User createUserByMethod(HttpRequest httpRequest) throws UnsupportedEncodingException {
 
         if (httpRequest.getHttpRequestMethod().equals(HttpRequestMethod.GET)) {
-            return new CreateUserGet();
+            return User.createUserByParameter(httpRequest.getHttpRequestPath().getHttpRequestQueryString().getQueryStrings());
         }
 
-        return new CreateUserPost();
+        return User.createUserByParameter(httpRequest.getHttpRequestBody().getBody());
     }
 
     private void createHeaderWithRedirectUrl(DataOutputStream dos, int lengthOfBodyContent) {
@@ -101,10 +98,10 @@ public class RequestHandler implements Runnable {
     }
 
 
-    private void responseCss200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void responseStatic200Header(DataOutputStream dos, int lengthOfBodyContent, String contentType) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
+            dos.writeBytes("Content-Type: text/" + contentType + ";charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
@@ -118,8 +115,9 @@ public class RequestHandler implements Runnable {
             return;
         }
 
-        if (path.endsWith(".css")) {
-            responseCss200Header(dos, lengthOfBodyContent);
+        if (path.contains(".")) {
+            String[] split = path.split("\\.");
+            responseStatic200Header(dos, lengthOfBodyContent, split[split.length-1]);
             return;
         }
 
@@ -128,8 +126,8 @@ public class RequestHandler implements Runnable {
             return;
         }
 
+        responseIndex200Header(dos, lengthOfBodyContent);
     }
-
 
     private void responseBody(DataOutputStream dos, byte[] body) {
         try {
