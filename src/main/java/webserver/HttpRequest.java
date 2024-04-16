@@ -48,7 +48,7 @@ public class HttpRequest {
         return httpRequestBody;
     }
 
-    public static HttpRequest ofFirstLine(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
 
         if (line == null) { return null;}

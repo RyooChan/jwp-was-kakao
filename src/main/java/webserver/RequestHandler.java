@@ -36,7 +36,7 @@ public class RequestHandler implements Runnable {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
 
-            HttpRequest httpRequest = HttpRequest.ofFirstLine(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
             DataOutputStream dos = new DataOutputStream(out);
 
