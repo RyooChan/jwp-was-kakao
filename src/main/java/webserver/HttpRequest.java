@@ -26,7 +26,9 @@ public class HttpRequest {
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
 
-        if (line == null) {return null;}
+        if (line == null) {
+            return null;
+        }
 
         String[] methodPathHtml = line.split(" ");
 
@@ -40,9 +42,9 @@ public class HttpRequest {
             headers.add(line);
             line = bufferedReader.readLine();
         }
-        HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.findHttpRequestQueryString(headers);
+        HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.ofFromHeaders(headers);
 
-        HttpRequestBody httpRequestBody = HttpRequestBody.findHttpRequestBody(IOUtils.readData(bufferedReader, httpRequestHeaders.findContentLength()));
+        HttpRequestBody httpRequestBody = HttpRequestBody.ofFromBody(IOUtils.readData(bufferedReader, httpRequestHeaders.findContentLength()));
 
         return new HttpRequest(httpRequestMethod, httpRequestFirstLine, httpRequestHeaders, httpRequestBody);
     }
@@ -59,22 +61,19 @@ public class HttpRequest {
         return httpRequestFirstLine;
     }
 
+    public boolean isCreateUser() {
+        return httpRequestFirstLine.getPath().equals("/user/create");
+    }
+
     public boolean isStatic() {
-        return this.httpRequestFirstLine.isEndsWith("css")
-            || this.httpRequestFirstLine.isEndsWith("eot")
-            || this.httpRequestFirstLine.isEndsWith("svg")
-            || this.httpRequestFirstLine.isEndsWith("ttf")
-            || this.httpRequestFirstLine.isEndsWith("woff")
-            || this.httpRequestFirstLine.isEndsWith("woff2")
-            || this.httpRequestFirstLine.isEndsWith("png")
-            || this.httpRequestFirstLine.isEndsWith("js");
+        return ContentType.isStatic(this.httpRequestFirstLine.findExtension());
     }
 
-    public boolean isPathEndsWith(String path) {
-        return this.httpRequestFirstLine.isEndsWith(path);
+    public boolean isTemplates() {
+        return ContentType.isTemplates(this.httpRequestFirstLine.findExtension());
     }
 
-    public boolean isPathEquals(String path) {
-        return this.httpRequestFirstLine.isPathEquals(path);
-    }
+//    public boolean isPathEquals(String path) {
+//        return this.httpRequestFirstLine.isPathEquals(path);
+//    }
 }

@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,95 +35,25 @@ public class RequestHandler implements Runnable {
 
             DataOutputStream dos = new DataOutputStream(out);
 
-            byte[] body = getBodyFromRequest(httpRequest);
-
-            response200Header(dos, body.length, httpRequest.getHttpRequestPath().getPath());
-            responseBody(dos, body);
+            HttpResponse httpResponse = HttpResponse.responseHeader(httpRequest);
+            responseHeader(dos, httpResponse);
+            responseBody(dos, httpResponse.getBody());
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
     }
 
-    private static byte[] getBodyFromRequest(HttpRequest httpRequest) throws IOException, URISyntaxException {
-
-        if (httpRequest.isPathEndsWith(".html") || httpRequest.isPathEndsWith(".ico")) {
-            return FileIoUtils.loadFileFromClasspath("./templates" + httpRequest.getHttpRequestPath().getPath());
-        }
-
-        if (httpRequest.isStatic()) {
-            return FileIoUtils.loadFileFromClasspath("./static" + httpRequest.getHttpRequestPath().getPath());
-        }
-
-        if (httpRequest.isPathEquals("/user/create")) {
-            User user = createUserByMethod(httpRequest);
-            return FileIoUtils.loadFileFromClasspath("./templates/index.html");
-        }
-
-        return "Hello World".getBytes();
-    }
-
-    private static User createUserByMethod(HttpRequest httpRequest) {
-
-        if (httpRequest.getHttpRequestMethod().equals(HttpRequestMethod.GET)) {
-            return User.createUserByParameter(httpRequest.getHttpRequestPath().getHttpRequestQueryString().getQueryStrings());
-        }
-
-        return User.createUserByParameter(httpRequest.getHttpRequestBody().getBody());
-    }
-
-    private void createHeaderWithRedirectUrl(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 OK \n");
-            dos.writeBytes("Content-Type: application/json;charset=utf-8\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("location: /index.html" + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    private void responseIndex200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-
-    private void responseStatic200Header(DataOutputStream dos, int lengthOfBodyContent, String contentType) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/" + contentType + ";charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, String path) {
-        if (path.endsWith(".html")) {
-            responseIndex200Header(dos, lengthOfBodyContent);
-            return;
-        }
-
-        if (path.contains(".")) {
-            String[] split = path.split("\\.");
-            responseStatic200Header(dos, lengthOfBodyContent, split[split.length - 1]);
-            return;
-        }
-
-        if (path.equals("/user/create")) {
-            createHeaderWithRedirectUrl(dos, lengthOfBodyContent);
-            return;
-        }
-
-        responseIndex200Header(dos, lengthOfBodyContent);
+    private void responseHeader(DataOutputStream dos, HttpResponse httpResponse) throws IOException {
+        dos.writeBytes("HTTP/1.1 " + httpResponse.getHttpStatus() + " OK \n");
+        httpResponse.getHeaders()
+            .forEach((key, value) -> {
+                try {
+                    dos.writeBytes(key + ": " + value + "\r\n");
+                } catch (IOException e) {
+                    logger.error(e.getMessage());
+                }
+            });
+        dos.writeBytes("\r\n");
     }
 
     private void responseBody(DataOutputStream dos, byte[] body) {

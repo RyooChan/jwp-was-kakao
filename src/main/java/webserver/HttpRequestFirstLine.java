@@ -1,6 +1,7 @@
 package webserver;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class HttpRequestFirstLine {
             return new HttpRequestFirstLine(pathComponents[0], new HttpRequestQueryString(httpRequestQueryStrings));
         }
 
-        return new HttpRequestFirstLine(pathComponents[0], new HttpRequestQueryString(null));
+        return new HttpRequestFirstLine(pathComponents[0], new HttpRequestQueryString(new HashMap<>()));
     }
 
     public String getPath() {
@@ -52,5 +53,10 @@ public class HttpRequestFirstLine {
 
     public boolean isEndsWith(String path) {
         return this.path.endsWith(path);
+    }
+
+    public String findExtension() {
+        String[] split = this.path.split("\\.");
+        return split[split.length - 1];
     }
 }

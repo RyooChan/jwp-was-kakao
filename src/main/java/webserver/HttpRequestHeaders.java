@@ -18,7 +18,7 @@ public class HttpRequestHeaders {
         this.headers = headers;
     }
 
-    public static HttpRequestHeaders findHttpRequestQueryString(List<String> headerInput) {
+    public static HttpRequestHeaders ofFromHeaders(List<String> headerInput) {
         Map<String, String> headers = headerInput.stream()
             .map(header -> header.split(HEADER_PARSER_TOKEN))
             .collect(Collectors.toMap(keyValue -> keyValue[KEY_INDEX], KeyValue -> URLDecoder.decode(KeyValue[VALUE_INDEX], StandardCharsets.UTF_8)));

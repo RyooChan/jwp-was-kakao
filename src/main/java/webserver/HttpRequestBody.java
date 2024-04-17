@@ -23,7 +23,7 @@ public class HttpRequestBody {
         return body;
     }
 
-    public static HttpRequestBody findHttpRequestBody(String body) {
+    public static HttpRequestBody ofFromBody(String body) {
         if (body.isEmpty()) {
             return new HttpRequestBody(null);
         }
