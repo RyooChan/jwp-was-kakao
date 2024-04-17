@@ -1,5 +1,11 @@
 package model;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
+
+import db.DataBase;
+
 public class User {
     private String userId;
     private String password;
@@ -17,20 +23,22 @@ public class User {
         return userId;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     @Override
     public String toString() {
         return "User [userId=" + userId + ", password=" + password + ", name=" + name + ", email=" + email + "]";
+    }
+
+
+    public static User createUserByParameter(Map<String, String> parameters) {
+        String userId = parameters.get("userId");
+        String password = parameters.get("password");
+        String name = parameters.get("name");
+        String email = parameters.get("email");
+
+        return new User(userId, password, name, email);
     }
 }
