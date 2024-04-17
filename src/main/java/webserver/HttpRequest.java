@@ -4,23 +4,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import utils.HttpRequestBody;
-import utils.HttpRequestHeaders;
-import utils.HttpRequestMethod;
-import utils.HttpRequestPath;
 import utils.IOUtils;
 
 public class HttpRequest {
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+
     private final HttpRequestMethod httpRequestMethod;
-    private final HttpRequestPath httpRequestPath;
+    private final HttpRequestFirstLine httpRequestFirstLine;
     private final HttpRequestHeaders httpRequestHeaders;
     private final HttpRequestBody httpRequestBody;
 
-    private HttpRequest(HttpRequestMethod httpRequestMethod, HttpRequestPath httpRequestPath, HttpRequestHeaders httpRequestHeaders, HttpRequestBody httpRequestBody) {
+    private HttpRequest(HttpRequestMethod httpRequestMethod, HttpRequestFirstLine httpRequestFirstLine, HttpRequestHeaders httpRequestHeaders, HttpRequestBody httpRequestBody) {
         this.httpRequestMethod = httpRequestMethod;
-        this.httpRequestPath = httpRequestPath;
+        this.httpRequestFirstLine = httpRequestFirstLine;
         this.httpRequestHeaders = httpRequestHeaders;
         this.httpRequestBody = httpRequestBody;
     }
@@ -34,7 +32,7 @@ public class HttpRequest {
 
         HttpRequestMethod httpRequestMethod = HttpRequestMethod.findHttpRequestMethod(methodPathHtml[0]);
 
-        HttpRequestPath httpRequestPath = HttpRequestPath.findHttpRequestPath(methodPathHtml[1]);
+        HttpRequestFirstLine httpRequestFirstLine = HttpRequestFirstLine.findHttpRequestPath(methodPathHtml[1]);
 
         List<String> headers = new ArrayList<>();
         line = bufferedReader.readLine();
@@ -46,7 +44,7 @@ public class HttpRequest {
 
         HttpRequestBody httpRequestBody = HttpRequestBody.findHttpRequestBody(IOUtils.readData(bufferedReader, httpRequestHeaders.findContentLength()));
 
-        return new HttpRequest(httpRequestMethod, httpRequestPath, httpRequestHeaders, httpRequestBody);
+        return new HttpRequest(httpRequestMethod, httpRequestFirstLine, httpRequestHeaders, httpRequestBody);
     }
 
     public HttpRequestBody getHttpRequestBody() {
@@ -57,7 +55,26 @@ public class HttpRequest {
         return httpRequestMethod;
     }
 
-    public HttpRequestPath getHttpRequestPath() {
-        return httpRequestPath;
+    public HttpRequestFirstLine getHttpRequestPath() {
+        return httpRequestFirstLine;
+    }
+
+    public boolean isStatic() {
+        return this.httpRequestFirstLine.isEndsWith("css")
+            || this.httpRequestFirstLine.isEndsWith("eot")
+            || this.httpRequestFirstLine.isEndsWith("svg")
+            || this.httpRequestFirstLine.isEndsWith("ttf")
+            || this.httpRequestFirstLine.isEndsWith("woff")
+            || this.httpRequestFirstLine.isEndsWith("woff2")
+            || this.httpRequestFirstLine.isEndsWith("png")
+            || this.httpRequestFirstLine.isEndsWith("js");
+    }
+
+    public boolean isPathEndsWith(String path) {
+        return this.httpRequestFirstLine.isEndsWith(path);
+    }
+
+    public boolean isPathEquals(String path) {
+        return this.httpRequestFirstLine.isPathEquals(path);
     }
 }

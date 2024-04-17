@@ -6,16 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import model.User;
 import utils.FileIoUtils;
-import utils.HttpRequestMethod;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
@@ -28,10 +27,9 @@ public class RequestHandler implements Runnable {
 
     public void run() {
         logger.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                connection.getPort());
+            connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
 
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
@@ -49,15 +47,15 @@ public class RequestHandler implements Runnable {
 
     private static byte[] getBodyFromRequest(HttpRequest httpRequest) throws IOException, URISyntaxException {
 
-        if (httpRequest.getHttpRequestPath().isEndsWith(".html")) {
+        if (httpRequest.isPathEndsWith(".html") || httpRequest.isPathEndsWith(".ico")) {
             return FileIoUtils.loadFileFromClasspath("./templates" + httpRequest.getHttpRequestPath().getPath());
         }
 
-        if (httpRequest.getHttpRequestPath().isEndsWith(".css")) {
+        if (httpRequest.isStatic()) {
             return FileIoUtils.loadFileFromClasspath("./static" + httpRequest.getHttpRequestPath().getPath());
         }
 
-        if (httpRequest.getHttpRequestPath().isPathEquals("/user/create")) {
+        if (httpRequest.isPathEquals("/user/create")) {
             User user = createUserByMethod(httpRequest);
             return FileIoUtils.loadFileFromClasspath("./templates/index.html");
         }
@@ -65,7 +63,7 @@ public class RequestHandler implements Runnable {
         return "Hello World".getBytes();
     }
 
-    private static User createUserByMethod(HttpRequest httpRequest) throws UnsupportedEncodingException {
+    private static User createUserByMethod(HttpRequest httpRequest) {
 
         if (httpRequest.getHttpRequestMethod().equals(HttpRequestMethod.GET)) {
             return User.createUserByParameter(httpRequest.getHttpRequestPath().getHttpRequestQueryString().getQueryStrings());
@@ -117,7 +115,7 @@ public class RequestHandler implements Runnable {
 
         if (path.contains(".")) {
             String[] split = path.split("\\.");
-            responseStatic200Header(dos, lengthOfBodyContent, split[split.length-1]);
+            responseStatic200Header(dos, lengthOfBodyContent, split[split.length - 1]);
             return;
         }
 

@@ -1,9 +1,8 @@
-package utils;
+package webserver;
 
 public enum HttpRequestMethod {
     GET,
-    POST
-    ;
+    POST;
 
     public static HttpRequestMethod findHttpRequestMethod(String method) {
         return HttpRequestMethod.valueOf(method);

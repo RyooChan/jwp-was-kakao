@@ -33,10 +33,10 @@ public class User {
     }
 
 
-    public static User createUserByParameter(Map<String, String> parameters) throws UnsupportedEncodingException {
+    public static User createUserByParameter(Map<String, String> parameters) {
         String userId = parameters.get("userId");
         String password = parameters.get("password");
-        String name = URLEncoder.encode(parameters.get("name"), "UTF-8");
+        String name = parameters.get("name");
         String email = parameters.get("email");
 
         return new User(userId, password, name, email);

@@ -1,13 +1,16 @@
-package utils;
+package webserver;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static webserver.HttpRequest.KEY_INDEX;
+import static webserver.HttpRequest.VALUE_INDEX;
+
 public class HttpRequestHeaders {
     private static final String HEADER_PARSER_TOKEN = ": ";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -18,7 +21,7 @@ public class HttpRequestHeaders {
     public static HttpRequestHeaders findHttpRequestQueryString(List<String> headerInput) {
         Map<String, String> headers = headerInput.stream()
             .map(header -> header.split(HEADER_PARSER_TOKEN))
-            .collect(Collectors.toMap(keyValue -> keyValue[KEY_INDEX], KeyValue -> KeyValue[VALUE_INDEX]));
+            .collect(Collectors.toMap(keyValue -> keyValue[KEY_INDEX], KeyValue -> URLDecoder.decode(KeyValue[VALUE_INDEX], StandardCharsets.UTF_8)));
 
         return new HttpRequestHeaders(headers);
     }
