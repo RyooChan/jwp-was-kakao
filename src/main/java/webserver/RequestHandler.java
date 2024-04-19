@@ -34,7 +34,6 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
             DataOutputStream dos = new DataOutputStream(out);
-
             HttpResponse httpResponse = HttpResponse.responseHeader(httpRequest);
             responseHeader(dos, httpResponse);
             responseBody(dos, httpResponse.getBody());

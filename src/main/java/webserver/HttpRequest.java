@@ -3,9 +3,15 @@ package webserver;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import login.HttpCookie;
 import utils.IOUtils;
+
+import static webserver.HttpRequestMethod.GET;
+import static webserver.HttpRequestMethod.POST;
 
 public class HttpRequest {
     public static final int KEY_INDEX = 0;
@@ -15,12 +21,14 @@ public class HttpRequest {
     private final HttpRequestFirstLine httpRequestFirstLine;
     private final HttpRequestHeaders httpRequestHeaders;
     private final HttpRequestBody httpRequestBody;
+    private final HttpCookie httpCookie;
 
-    private HttpRequest(HttpRequestMethod httpRequestMethod, HttpRequestFirstLine httpRequestFirstLine, HttpRequestHeaders httpRequestHeaders, HttpRequestBody httpRequestBody) {
+    private HttpRequest(HttpRequestMethod httpRequestMethod, HttpRequestFirstLine httpRequestFirstLine, HttpRequestHeaders httpRequestHeaders, HttpRequestBody httpRequestBody, HttpCookie httpCookie) {
         this.httpRequestMethod = httpRequestMethod;
         this.httpRequestFirstLine = httpRequestFirstLine;
         this.httpRequestHeaders = httpRequestHeaders;
         this.httpRequestBody = httpRequestBody;
+        this.httpCookie = httpCookie;
     }
 
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
@@ -46,7 +54,23 @@ public class HttpRequest {
 
         HttpRequestBody httpRequestBody = HttpRequestBody.ofFromBody(IOUtils.readData(bufferedReader, httpRequestHeaders.findContentLength()));
 
-        return new HttpRequest(httpRequestMethod, httpRequestFirstLine, httpRequestHeaders, httpRequestBody);
+        Map<String, String> parameter = getParameter(httpRequestMethod, httpRequestBody, httpRequestFirstLine);
+        HttpCookie httpCookie = new HttpCookie(parameter.get("Cookie"));
+
+        return new HttpRequest(httpRequestMethod, httpRequestFirstLine, httpRequestHeaders, httpRequestBody, httpCookie);
+    }
+
+    private static Map<String, String> getParameter(HttpRequestMethod httpRequestMethod, HttpRequestBody httpRequestBody, HttpRequestFirstLine httpRequestFirstLine) {
+        Map<String, String> parameter = new HashMap<>();
+
+        if (httpRequestMethod == POST) {
+            parameter = httpRequestBody.getBody();
+        }
+
+        if (httpRequestMethod == GET) {
+            parameter = httpRequestFirstLine.getHttpRequestQueryString().getQueryStrings();
+        }
+        return parameter;
     }
 
     public HttpRequestBody getHttpRequestBody() {
@@ -61,8 +85,8 @@ public class HttpRequest {
         return httpRequestFirstLine;
     }
 
-    public boolean isCreateUser() {
-        return httpRequestFirstLine.getPath().equals("/user/create");
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
     }
 
     public boolean isStatic() {
@@ -72,8 +96,4 @@ public class HttpRequest {
     public boolean isTemplates() {
         return ContentType.isTemplates(this.httpRequestFirstLine.findExtension());
     }
-
-//    public boolean isPathEquals(String path) {
-//        return this.httpRequestFirstLine.isPathEquals(path);
-//    }
 }

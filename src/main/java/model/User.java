@@ -3,8 +3,13 @@ package model;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import db.DataBase;
+import login.Session;
+import login.SessionManager;
+import webserver.HttpRequest;
 
 public class User {
     private String userId;
@@ -39,6 +44,24 @@ public class User {
         String name = parameters.get("name");
         String email = parameters.get("email");
 
-        return new User(userId, password, name, email);
+        User user = new User(userId, password, name, email);
+        DataBase.addUser(user);
+        return user;
+    }
+
+    public static User login(HttpRequest httpRequest) {
+        Map<String, String> parameter = httpRequest.getHttpRequestBody().getBody();
+
+        User user = DataBase.findUserById(parameter.get("userId"));
+
+        if (user == null) {
+            throw new IllegalArgumentException("해당하는 유저가 없습니다.");
+        }
+
+        if (!Objects.equals(user.password, parameter.get("password"))) {
+            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+        }
+
+        return user;
     }
 }
