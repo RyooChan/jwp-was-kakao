@@ -54,13 +54,13 @@ public class HttpRequest {
 
         HttpRequestBody httpRequestBody = HttpRequestBody.ofFromBody(IOUtils.readData(bufferedReader, httpRequestHeaders.findContentLength()));
 
-        Map<String, String> parameter = getParameter(httpRequestMethod, httpRequestBody, httpRequestFirstLine);
+        Map<String, String> parameter = getParameter(httpRequestMethod, httpRequestBody, httpRequestHeaders);
         HttpCookie httpCookie = new HttpCookie(parameter.get("Cookie"));
 
         return new HttpRequest(httpRequestMethod, httpRequestFirstLine, httpRequestHeaders, httpRequestBody, httpCookie);
     }
 
-    private static Map<String, String> getParameter(HttpRequestMethod httpRequestMethod, HttpRequestBody httpRequestBody, HttpRequestFirstLine httpRequestFirstLine) {
+    private static Map<String, String> getParameter(HttpRequestMethod httpRequestMethod, HttpRequestBody httpRequestBody, HttpRequestHeaders httpRequestHeaders) {
         Map<String, String> parameter = new HashMap<>();
 
         if (httpRequestMethod == POST) {
@@ -68,7 +68,7 @@ public class HttpRequest {
         }
 
         if (httpRequestMethod == GET) {
-            parameter = httpRequestFirstLine.getHttpRequestQueryString().getQueryStrings();
+            parameter = httpRequestHeaders.getHeaders();
         }
         return parameter;
     }

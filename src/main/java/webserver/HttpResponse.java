@@ -3,21 +3,25 @@ package webserver;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
 
 import db.DataBase;
 import login.HttpCookie;
 import login.Session;
 import login.SessionManager;
 import model.User;
+import model.Users;
 import utils.FileIoUtils;
 
 public class HttpResponse {
@@ -87,17 +91,18 @@ public class HttpResponse {
 
         if (session == null) {;
             body = FileIoUtils.loadFileFromClasspath("./templates/index.html");
-            headers = new HashMap<>();
             headers.put("Content-Type", "application/json;charset=utf-8");
             headers.put("location", "/user/login.html");
             return new HttpResponse(HttpStatus.FOUND, body, headers);
         }
 
-        Collection<User> users = DataBase.findAll();
+        Users users = new Users(new ArrayList<>(DataBase.findAll()));
         Handlebars handlebars = new Handlebars();
-        body = handlebars.compile(httpRequest.getHttpRequestPath().getPath())
-            .apply(users)
-            .getBytes();
+        Template template = handlebars.compile("./templates/user/list");
+        body = template.apply(users).getBytes();
+        headers.put("Content-Type", "text/html;charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.length));
+
         return new HttpResponse(HttpStatus.OK, body, headers);
     }
 
@@ -143,6 +148,7 @@ public class HttpResponse {
             return new HttpResponse(HttpStatus.OK, body, headers);
         }
     }
+
 
     public static HttpResponse responseHeader(HttpRequest httpRequest) throws IOException, URISyntaxException {
 
