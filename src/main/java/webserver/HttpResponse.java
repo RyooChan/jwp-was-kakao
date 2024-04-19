@@ -168,7 +168,7 @@ public class HttpResponse {
             return responseLoginUserHeader(httpRequest);
         }
 
-        if (httpRequest.getHttpRequestPath().getPath().equals("/user/list")) {
+        if (httpRequest.getHttpRequestPath().getPath().equals("/user/list.hbs")) {
             return responseUserListHeader(httpRequest);
         }
 
