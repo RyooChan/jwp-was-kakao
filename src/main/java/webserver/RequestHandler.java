@@ -47,6 +47,7 @@ public class RequestHandler implements Runnable {
         httpResponse.getHeaders()
             .forEach((key, value) -> {
                 try {
+                    System.out.println("key : " + key);
                     dos.writeBytes(key + ": " + value + "\r\n");
                 } catch (IOException e) {
                     logger.error(e.getMessage());

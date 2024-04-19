@@ -125,7 +125,7 @@ public class HttpResponse {
             headers = new HashMap<>();
             headers.put("Content-Type", "application/json;charset=utf-8");
             headers.put("Content-Length", String.valueOf(body.length));
-            headers.put("Set-Cookie", session.getId() + ";Path=/");
+            headers.put("Set-Cookie", "JSESSIONID=" + session.getId() + ";Path=/");
             headers.put("location", "/index.html");
 
             HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, body, headers);
